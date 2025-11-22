@@ -1,0 +1,476 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -96,
+        48
+      ],
+      "id": "d9c69e35-e107-4fc3-bedd-24eec094cbbd",
+      "name": "When chat message received",
+      "webhookId": "304165a0-9157-49c1-a3c5-2d8566487d1f"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a pure Routing Assistant. You do not answer questions. You only route them.\n\n1. IF user mentions Python, Backend, Logs, or API:\n   - Reply exactly: \"ROUTING_TO_PYTHON\"\n\n2. IF user mentions React, JavaScript, Frontend, OR Math/Calculations:\n   - Reply exactly: \"ROUTING_TO_FRONTEND\"\n\n3. IF user asks about Time, General Knowledge, History, Definitions, or Wiki:\n   - Reply exactly: \"ROUTING_TO_GENERAL\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        144,
+        48
+      ],
+      "id": "c4aae906-035b-4bfa-a300-0e1ec47e8fec",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        16,
+        256
+      ],
+      "id": "ca7a469f-101d-4703-8ab6-a6161e81fe9b",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "bmupCbLP2aJv7MKx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "ROUTING_TO_PYTHON",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "780f9830-9ad6-4629-9d8c-7d761912da32"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Python"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fe617ba8-8942-4760-b607-039da3ce3531",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "ROUTING_TO_FRONTEND",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Frontend"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "afa5386e-7f88-4469-898f-be0b71eaf89e",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "ROUTING_TO_GENERAL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "General"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        496,
+        48
+      ],
+      "id": "e6da217b-447b-4d99-b167-b5e576f09786",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput || \"Test\" }}",
+        "options": {
+          "systemMessage": "You are a Senior Python Backend Developer. Your goal is to fix the user's code, focusing on API logic, indentation, and efficiency. Always provide the corrected code in a block.\nIf the user provides a raw log with timestamps, use the 'clean_log_tool' to clean it first."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        720,
+        -224
+      ],
+      "id": "a5a9c191-0a26-484b-b659-c192a921764b",
+      "name": "Python Expert"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        720,
+        -48
+      ],
+      "id": "c43f4344-6f82-46d2-911a-dbc51427bdcd",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "bmupCbLP2aJv7MKx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "=define",
+        "text": "={{ $json.chatInput || \"Test Message\" }}",
+        "options": {
+          "systemMessage": "You are a React and JavaScript Expert. Your goal is to fix the user's code, focusing on UI components, CSS, and browser compatibility. Always provide the corrected code in a block."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        736,
+        240
+      ],
+      "id": "0fd4d54d-4091-4bd7-bf01-d2b3455bfab5",
+      "name": "Frontend Expert"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        736,
+        432
+      ],
+      "id": "08a806ae-2716-4d45-b554-27f98b4f17a0",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "bmupCbLP2aJv7MKx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to clean up raw error logs before analyzing them. The input should be the raw log text.",
+        "jsCode": "// Use the variable name from your JSON Example\nconst log = $fromAI(\"log_text\"); \n\n// If log is undefined, handle it gracefully\nif (!log) return \"No log provided\";\n\n// Remove timestamps\nconst cleaned = log.replace(/\\[.*?\\]/g, '').trim();\n\nreturn cleaned;",
+        "specifyInputSchema": true,
+        "jsonSchemaExample": "{\n  \"log_text\": \"Error [2023-10-12] System crashed\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        992,
+        -48
+      ],
+      "id": "edcfb9e9-7e60-4b40-a641-bd34d2088def",
+      "name": "clean_log_tool"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        960,
+        432
+      ],
+      "id": "6cb1ac1a-6782-47f0-bd8b-de2ba25cd6f8",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        80
+      ],
+      "id": "774f8094-d316-4ff2-a17e-e2f6eda99c34",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "promptType": "=define",
+        "text": "={{ $('When chat message received').first().json.chatInput }}",
+        "options": {
+          "systemMessage": "You are a helpful assistant. Use your tools to answer the user."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        672,
+        656
+      ],
+      "id": "7ab94ce2-d633-421c-981e-32a3a42f2c78",
+      "name": "General Assistant"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        544,
+        864
+      ],
+      "id": "c8c4653d-1012-4fca-a06c-347e2bddf9ef",
+      "name": "Groq Chat Model3",
+      "credentials": {
+        "groqApi": {
+          "id": "bmupCbLP2aJv7MKx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [
+        960,
+        880
+      ],
+      "id": "7ddeac6d-a0f9-4dd7-ac95-87438978b940",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        816,
+        912
+      ],
+      "id": "61ae791b-f86d-493e-8a08-0b4e87e4d5fc",
+      "name": "Wikipedia"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Python Expert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Frontend Expert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "General Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Python Expert",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Frontend Expert",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "clean_log_tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Python Expert",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Frontend Expert",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Python Expert",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "General Assistant",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "ai_tool": [
+        [
+          {
+            "node": "General Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "General Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fcc627a1-15c3-4628-95fd-be7c27c45132",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "073e784de9ae36f273f87bbe9abe0012b0972e2ef3544bf09f9d6a18b7b01590"
+  },
+  "id": "wd1KkTqjXakoKqL2",
+  "tags": []
+}
