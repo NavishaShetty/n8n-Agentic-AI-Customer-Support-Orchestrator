@@ -22,3 +22,5 @@ This project implements a "Hub-and-Spoke" agentic AI system using n8n. It simula
 ## Usage
 - **Python Debugging:** Type "I have a Python error: [logs]"
 - **General Info:** Type "What time is it?"
+
+<img width="460" height="374" alt="image" src="https://github.com/user-attachments/assets/a276716a-7f4e-4475-b0f4-187a46bb22c6" />
